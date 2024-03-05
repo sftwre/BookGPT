@@ -1,0 +1,6 @@
+# directories
+venv/
+docs/
+src/__pycache__/
+
+.env
