@@ -68,5 +68,59 @@ class ChaptersChain(BaseStructureChain):
     Your job is to generate a list of chapters.
     ONLY the list and nothing more!
     You are provided with a title, a plot and a main character for a novel.
-    Generate a list of chapters describing the plot of the novel.
-    """
+    Generate a list of chapters describing the plot of that novel.
+    The chapters should be consistent with the genre of the novel.
+    The chapters should be consistent with the style of the author.
+
+    Follow this template:
+
+    Prolouge: [description of prolouge]
+    Chapter 1: [description of chapter1]
+    ...
+    Epilogue: [description of epilogue]
+
+    Make sure the chapter is followed by the character `:` and its description. For example: `Chapter 1: [description of chapter 1]`
+
+    subject: {subject}
+    Genre: {genre}
+    Author: {author}
+
+    Title: {title}
+    Main character's profile: {profile}
+
+    Plot: {plot}
+
+    Return the chapter list and only the chapter list
+    Chapters list:"""
+
+    def run(self, subject, genre, author, profile, title, plot):
+        response = self.chain.predict(
+            subject=subject,
+            genre=genre,
+            author=author,
+            profile=profile,
+            title=title,
+            plot=plot
+        )
+        return self.parse(response)
+
+    def parse(self, response):
+        chapter_list = response.strip().split('\n')
+        chapter_list = [chapter for chapter in chapter_list if ':' in chapter]
+        chapter_dict = dict([
+            chapter.strip().split(':')
+            for chapter in chapter_list
+        ])
+        return chapter_dict
+    
+def get_structure(subject, genre, author, profile):
+
+    title_chain = TitleChain()
+    plot_chain = PlotChain()
+    chapters_chain = ChaptersChain()
+
+    title = title_chain.run(subject=subject, genre=genre, author=author, profile=profile)
+    plot = plot_chain.run(subject=subject, genre=genre, author=author, profile=profile, title=title)
+    chapter_dict = chapters_chain.run(subject=subject, genre=genre, author=author, profile=profile, title=title, plot=plot)
+
+    return title, plot, chapter_dict
