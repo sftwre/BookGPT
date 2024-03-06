@@ -2,7 +2,8 @@ from dotenv import load_dotenv
 load_dotenv()
 from characters import MainCharacterChain
 from structure import get_structure
-from events import ChapterPlotChain
+from events import get_events
+from writing import write_book
 
 subject = "Machine War"
 author = "Ernest Hemingway"
@@ -12,24 +13,7 @@ main_character_chain = MainCharacterChain()
 profile = main_character_chain.run('profile.pdf')
 
 title, plot, chapters_dict = get_structure(subject, genre, author, profile)
+summaries_dict, event_dict = get_events(subject, genre, author,
+                                        profile, title, plot, chapters_dict)
 
-chapter_plot_chain = ChapterPlotChain()
-summaries_dict = {}
-
-for chapter, _ in chapters_dict.items():
-
-    summaries_dict[chapter] = chapter_plot_chain.run(
-        subject,
-        genre,
-        author,
-        profile,
-        title,
-        plot,
-        summaries_dict,
-        chapters_dict,
-        chapter
-    )
-
-for chapter, plot in summaries_dict.items():
-    print(chapter)
-    print(plot)
+book = write_book(genre, author, title, profile, plot, summaries_dict, event_dict)

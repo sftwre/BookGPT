@@ -66,3 +66,100 @@ class ChapterPlotChain(BaseEventChain):
             summaries=summaries,
             chapter=chapter
         )
+    
+
+class EventsChain(BaseEventChain):
+
+    PROMPT = """
+    You are a writer and your job is to come up with a detailed list of events that happen in the current chapter of the novel.
+    Those events describe the plot of that chapter and the actions of the different characters in chronological order.
+    Additionally, you are provided with the list of the events that were outlined in the previous chapters.
+    The event list should be consistent with the genre of the novel.
+    The event list should be consistent with the style of the author.
+
+    Each element of that list should be returned no different lines. Follow this template:
+
+    Event 1
+    Event 2
+    ...
+    Final event
+
+    subject: {subject}
+    Genre: {genre}
+    Author: {author}
+
+    Title: {title}
+    Main charachter's profile: {profile}
+
+    Novel's Plot: {plot}
+
+    Events you outlined for previous chapters: {previous_events}
+
+    Summary of the current chapter:
+    {summary}
+
+    Return the events and only the events!
+    Event list for that chapter:
+    """
+
+    def run(self, subject, genre, author, profile, title, plot, summary, event_dict):
+
+        previous_events = ''
+
+        for chapter, events in event_dict.items():
+            previous_events += '\n' + chapter
+            for event in events:
+                previous_events += '\n' + event
+        
+        response = self.chain.predict(
+            subject=subject,
+            genre=genre,
+            author=author,
+            profile=profile,
+            title=title,
+            plot=plot,
+            summary=summary,
+            previous_events=previous_events,
+        )
+
+        return self.parse(response)
+
+    def parse(self, response):
+
+        event_list = response.strip().split('\n')
+        event_list = [
+            event.strip() for event in event_list if event.strip()
+        ]
+        return event_list
+    
+def get_events(subject, genre, author, profile, title, plot, chapters_dict):
+
+    summaries_dict = {}
+    event_dict = {}
+
+    for chapter, _ in chapters_dict.items():
+
+        summaries_dict[chapter] = chapter_plot_chain.run(
+            subject,
+            genre,
+            author,
+            profile,
+            title,
+            plot,
+            summaries_dict,
+            chapters_dict,
+            chapter
+        )
+
+        event_dict[chapter] = events_chain.run(
+            subject,
+            genre,
+            author,
+            profile,
+            title,
+            plot,
+            summary=summaries_dict[chapter],
+            event_dict=event_dict
+        )
+
+    return summaries_dict, event_dict
