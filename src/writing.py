@@ -1,4 +1,4 @@
-from util import BaseEventChain
+from utils import BaseEventChain
 
 class WriterChain(BaseEventChain):
 
@@ -26,7 +26,7 @@ class WriterChain(BaseEventChain):
     Current Chapter summary: {summary}
 
     Previous paragraphs:
-    {previous_paragrahps}
+    {previous_paragraphs}
 
     New event you need to write about now:
     {current_event}
