@@ -133,7 +133,8 @@ class EventsChain(BaseEventChain):
         return event_list
     
 def get_events(subject, genre, author, profile, title, plot, chapters_dict):
-
+    chapter_plot_chain = ChapterPlotChain()
+    events_chain = EventsChain()
     summaries_dict = {}
     event_dict = {}
 
